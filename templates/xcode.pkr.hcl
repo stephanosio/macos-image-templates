@@ -54,7 +54,7 @@ locals {
       type = "shell"
       inline = [
         "source ~/.zprofile",
-        "sudo xcodes install ${version} --experimental-unxip --path /Users/admin/Downloads/Xcode_${version}.xip --select --empty-trash",
+        "sudo xcodes install ${version} --experimental-unxip --path /Users/runner/Downloads/Xcode_${version}.xip --select --empty-trash",
         // get selected xcode path, strip /Contents/Developer and move to GitHub compatible locations
         "INSTALLED_PATH=$(xcodes select -p)",
         "CONTENTS_DIR=$(dirname $INSTALLED_PATH)",
@@ -121,7 +121,7 @@ build {
 
   provisioner "file" {
     sources      = [ for version in var.xcode_version : pathexpand("~/XcodesCache/Xcode_${version}.xip")]
-    destination = "/Users/admin/Downloads/"
+    destination = "/Users/runner/Downloads/"
   }
 
   // iterate over all Xcode versions and install them

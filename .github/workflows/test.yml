@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+
+permissions:
+  packages: write
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: macos-14
+
+    steps:
+    - name: Install packages
+      run: |
+        brew tap hashicorp/tap
+        brew install hashicorp/tap/packer
+        brew install cirruslabs/cli/tart
+
+    - name: Print environment information
+      run: |
+        packer --version
+        tart --version
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Pull base Tart image
+      run: |
+        tart pull ghcr.io/cirruslabs/macos-sonoma-xcode:15.3
+        # tart pull ghcr.io/cirruslabs/macos-sonoma-base:latest
+        tart list
+
+    - name: Build Tart image
+      env:
+        PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # packer init templates/xcode.pkr.hcl
+        # packer build -var macos_version="sonoma" -var xcode_version="[\"15.3\"]" templates/xcode.pkr.hcl
+        packer init templates/sdk-build-macos.pkr.hcl
+        packer build sdk-build-macos.pkr.hcl
